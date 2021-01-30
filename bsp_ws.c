@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
@@ -68,7 +69,8 @@ static int _adc_read() {
 }
 
 int bsp_adc_start_dma() {
-
+	_adc_read();
+	alarm(1);
 }
 
 #define TEST 1
