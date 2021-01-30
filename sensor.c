@@ -17,7 +17,7 @@
 */
 /*.$endhead${.::sensor.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 #include "qpn.h"    /* QP-nano framework API */
-#include "bsp.h"    /* Board Support Package interface */
+#include "bsp_ws.h"    /* Board Support Package interface */
 #include "safe_std.h" /* portable "safe" <stdio.h>/<string.h> facilities */
 #include <stdlib.h> /* for exit() */
 Q_DEFINE_THIS_FILE
@@ -27,7 +27,7 @@ ADC_SAMPLE_SIG = Q_USER_SIG,
 };
 
 //$declare(AOs::Sensor)
-
+//$declare(AOs::Sensor_ctor)
 static Sensor l_sensor;
 QActive * const AO_Sensor = &l_sensor.super;
 
@@ -48,5 +48,6 @@ QACTIVE_START(AO_Sensor,
               (QEvt *)0);
 return QF_run();
 }
-//$define(AOs::Sensor_ctor)
 //$define(AOs::Sensor)
+//$define(AOs::Sensor_ctor)
+
