@@ -42,14 +42,14 @@ endif
 # C source files...
 C_SRCS := \
 	sensor.c \
-	#bsp.c \
+	bsp_ws.c \
 	#main.c
 
 # C++ source files...
 CPP_SRCS :=
 
 LIB_DIRS  :=
-LIBS      :=
+LIBS      := -fPIE
 
 # defines...
 DEFINES   :=
@@ -77,7 +77,7 @@ C_SRCS += \
 	qepn.c \
 	qfn_posix.c
 
-LIBS += -lpthread
+LIBS += -lpthread 
 
 endif
 
@@ -124,10 +124,10 @@ ifeq (rel, $(CONF)) # Release configuration ..................................
 
 BIN_DIR := build_rel
 # gcc options:
-CFLAGS  = -c -O3 -fno-pie -std=c99 -pedantic -Wall -Wextra -W \
+CFLAGS  = -c -O3 -fPIE -std=c99 -pedantic -Wall -Wextra -W \
 	$(INCLUDES) $(DEFINES) -DNDEBUG
 
-CPPFLAGS = -c -O3 -fno-pie -std=c++11 -pedantic -Wall -Wextra \
+CPPFLAGS = -c -O3 -fPIE -std=c++11 -pedantic -Wall -Wextra \
 	-fno-rtti -fno-exceptions \
 	$(INCLUDES) $(DEFINES) -DNDEBUG
 
@@ -136,10 +136,10 @@ else # default Debug configuration .........................................
 BIN_DIR := build
 
 # gcc options:
-CFLAGS  = -c -g -O -fno-pie -std=c99 -pedantic -Wall -Wextra -W \
+CFLAGS  = -c -g -O -fPIE -std=c99 -pedantic -Wall -Wextra -W \
 	$(INCLUDES) $(DEFINES)
 
-CPPFLAGS = -c -g -O -fno-pie -std=c++11 -pedantic -Wall -Wextra \
+CPPFLAGS = -c -g -O -fPIE -std=c++11 -pedantic -Wall -Wextra \
 	-fno-rtti -fno-exceptions \
 	$(INCLUDES) $(DEFINES)
 

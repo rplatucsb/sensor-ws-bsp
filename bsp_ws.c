@@ -73,7 +73,7 @@ int bsp_adc_start_dma() {
 	alarm(1);
 }
 
-#define TEST 1
+#define TEST 0
 #if TEST
 int main() {
 	bsp_init();

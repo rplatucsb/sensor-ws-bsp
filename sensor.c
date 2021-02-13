@@ -18,36 +18,91 @@
 /*.$endhead${.::sensor.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 #include "qpn.h"    /* QP-nano framework API */
 #include "bsp_ws.h"    /* Board Support Package interface */
-#include "safe_std.h" /* portable "safe" <stdio.h>/<string.h> facilities */
+#include <stdio.h>
 #include <stdlib.h> /* for exit() */
 Q_DEFINE_THIS_FILE
 
-enum ADCSig{
-ADC_SAMPLE_SIG = Q_USER_SIG,
-};
+/*.$declare${AOs::Sensor_ctor} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+/*.${AOs::Sensor_ctor} .....................................................*/
+static void Sensor_ctor(void);
+/*.$enddecl${AOs::Sensor_ctor} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+/*.$declare${AOs::Sensor} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+/*.${AOs::Sensor} ..........................................................*/
+typedef struct Sensor {
+/* protected: */
+    QActive super;
+} Sensor;
 
-//$declare(AOs::Sensor)
-//$declare(AOs::Sensor_ctor)
+/* protected: */
+static QState Sensor_initial(Sensor * const me);
+static QState Sensor_sensor_loop(Sensor * const me);
+/*.$enddecl${AOs::Sensor} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+
+enum ADCSig{
+    SAMPLE_ADC_SIG = Q_USER_SIG,
+    UPDATE_ADC_SIG
+};
+static QEvt sensor_queueSto[10];
 static Sensor l_sensor;
 QActive * const AO_Sensor = &l_sensor.super;
 
-static void Sensor_ctor(void) {
-    Sensor *me = (Sensor *)AO_Sensor;
-    QActive_ctor(&me->super, Q_STATE_CAST(&Sensor_initial));
-}
+QActiveCB const Q_ROM QF_active[] = {
+    { (QActive *)&AO_Sensor,  sensor_queueSto,     Q_DIM(sensor_queueSto)     },
+    { (QActive *)0,           (QEvt *)0,        0U                      }
+};
+
 
 int main(){
-
-static QEvt const *sensor_queueSto[10];
-QF_init(Q_DIM(QF_active));
-Sensor_ctor();
-QACTIVE_START(AO_Sensor,
+    QF_init(Q_DIM(QF_active));
+    Sensor_ctor();
+    /*QACTIVE_START(AO_Sensor,
               1U,
               sensor_queueSto, Q_DIM(sensor_queueSto),
               (void*)0, 0U,
-              (QEvt *)0);
-return QF_run();
+              (QEvt *)0); */
+    return QF_run();
 }
-//$define(AOs::Sensor)
-//$define(AOs::Sensor_ctor)
+/*.$skip${QP_VERSION} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+/*. Check for the minimum required QP version */
+#if (QP_VERSION < 680U) || (QP_VERSION != ((QP_RELEASE^4294967295U) % 0x3E8U))
+#error qpn version 6.8.0 or higher required
+#endif
+/*.$endskip${QP_VERSION} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+/*.$define${AOs::Sensor_ctor} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+/*.${AOs::Sensor_ctor} .....................................................*/
+static void Sensor_ctor(void) {
+    Sensor * const me = (Sensor * const) &AO_Sensor;
+    QActive_ctor(&me->super, Q_STATE_CAST(&Sensor_initial));
+}
+/*.$enddef${AOs::Sensor_ctor} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+/*.$define${AOs::Sensor} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*/
+/*.${AOs::Sensor} ..........................................................*/
+/*.${AOs::Sensor::SM} ......................................................*/
+static QState Sensor_initial(Sensor * const me) {
+    /*.${AOs::Sensor::SM::initial} */
+    return Q_TRAN(&Sensor_sensor_loop);
+}
+/*.${AOs::Sensor::SM::sensor_loop} .........................................*/
+static QState Sensor_sensor_loop(Sensor * const me) {
+    QState status_;
+    switch (Q_SIG(me)) {
+        /*.${AOs::Sensor::SM::sensor_loop::SAMPLE_ADC} */
+        case SAMPLE_ADC_SIG: {
+            bsp_adc_start_dma();
+            status_ = Q_HANDLED();
+            break;
+        }
+        /*.${AOs::Sensor::SM::sensor_loop::UPDATE_ADC} */
+        case UPDATE_ADC_SIG: {
+            status_ = Q_HANDLED();
+            break;
+        }
+        default: {
+            status_ = Q_SUPER(&QHsm_top);
+            break;
+        }
+    }
+    return status_;
+}
+/*.$enddef${AOs::Sensor} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 

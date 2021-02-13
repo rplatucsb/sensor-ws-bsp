@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model version="5.1.0" links="0">
  <framework name="qpn"/>
- <package name="AOS" stereotype="0x02">
+ <package name="AOs" stereotype="0x02">
   <class name="Sensor" superclass="qpn::QActive">
    <statechart properties="0x01">
     <initial target="../1">
@@ -13,7 +13,7 @@
     <state name="sensor_loop">
      <entry brief="Start Loop"/>
      <tran trig="SAMPLE_ADC">
-      <action brief="Sample ADC">BSP_ADC_Start_DMA();</action>
+      <action brief="Sample ADC">bsp_adc_start_dma();</action>
       <tran_glyph conn="10,32,3,-1,22">
        <action box="0,-2,23,2"/>
       </tran_glyph>
@@ -32,7 +32,7 @@
    </statechart>
   </class>
   <operation name="Sensor_ctor" type="void" visibility="0x00" properties="0x00">
-   <code>Sensor * const me = &amp;AO_Sensor;
+   <code>Sensor * const me = (Sensor * const) &amp;AO_Sensor;
 QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Sensor_initial));</code>
   </operation>
  </package>
@@ -44,31 +44,32 @@ QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Sensor_initial));</code>
 #include &lt;stdlib.h&gt; /* for exit() */
 Q_DEFINE_THIS_FILE
 
-enum ADCSig{
-ADC_SAMPLE_SIG = Q_USER_SIG,
-};
-
 $declare${AOs::Sensor_ctor}
 $declare${AOs::Sensor}
+
+enum ADCSig{
+    SAMPLE_ADC_SIG = Q_USER_SIG,
+    UPDATE_ADC_SIG
+};
+static QEvt sensor_queueSto[10];
 static Sensor l_sensor;
 QActive * const AO_Sensor = &amp;l_sensor.super;
- 
-static void Sensor_ctor(void) {
-    Sensor *me = (Sensor *)AO_Sensor;
-    QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Sensor_initial));
-}
+
+QActiveCB const Q_ROM QF_active[] = {
+    { (QActive *)&amp;AO_Sensor,  sensor_queueSto,     Q_DIM(sensor_queueSto)     },
+    { (QActive *)0,           (QEvt *)0,        0U                      }
+};
+
 
 int main(){
-
-static QEvt const *sensor_queueSto[10];
-QF_init(Q_DIM(QF_active));
-Sensor_ctor();
-QACTIVE_START(AO_Sensor,
+    QF_init(Q_DIM(QF_active));
+    Sensor_ctor();
+    /*QACTIVE_START(AO_Sensor,
               1U,
               sensor_queueSto, Q_DIM(sensor_queueSto),
               (void*)0, 0U,
-              (QEvt *)0);
-return QF_run();
+              (QEvt *)0); */
+    return QF_run();
 }
 $define${AOs::Sensor_ctor}
 $define${AOs::Sensor}
