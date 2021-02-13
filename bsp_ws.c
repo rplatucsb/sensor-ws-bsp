@@ -44,13 +44,12 @@ static int _adc_read() {
 			ERRCHECK();
 			return 1;
 		}
-		char *str = line;
 		char *current = line;
 		do {
 			char sensorcode[4];
 			unsigned int val;
 			if(sscanf(current, "%s %x", sensorcode, &val) == 2) {
-				for(int i = 0; i < sizeof(sensors)/sizeof(sensors[0]); i++) {
+				for(unsigned int i = 0; i < sizeof(sensors)/sizeof(sensors[0]); i++) {
 					if(!strcmp(sensorcode, sensors[i])) {
 						// set sensor data if its equal
 						printf("%s to %x; ", sensorcode, val);
@@ -66,11 +65,14 @@ static int _adc_read() {
 		printf("\n");
 		free(line);
 	}
+	return 0;
 }
+ 
 
 int bsp_adc_start_dma() {
 	_adc_read();
 	alarm(1);
+	return 0;
 }
 
 #define TEST 0

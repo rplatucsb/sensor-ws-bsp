@@ -50,7 +50,7 @@ C_SRCS := \
 CPP_SRCS :=
 
 LIB_DIRS  :=
-LIBS      := -fPIE
+LIBS      := 
 
 # defines...
 DEFINES   :=
@@ -125,7 +125,7 @@ ifeq (rel, $(CONF)) # Release configuration ..................................
 
 BIN_DIR := build_rel
 # gcc options:
-CFLAGS  = -c -O3 -fPIE -std=c99 -pedantic -Wall -Wextra -W \
+CFLAGS  = -c -O3 -fPIE -pedantic -Wall -Wextra -W \
 	$(INCLUDES) $(DEFINES) -DNDEBUG
 
 CPPFLAGS = -c -O3 -fPIE -std=c++11 -pedantic -Wall -Wextra \
@@ -137,7 +137,7 @@ else # default Debug configuration .........................................
 BIN_DIR := build
 
 # gcc options:
-CFLAGS  = -c -g -O -fPIE -std=c99 -pedantic -Wall -Wextra -W \
+CFLAGS  = -c -g -O -fPIE -pedantic -Wall -Wextra -W \
 	$(INCLUDES) $(DEFINES)
 
 CPPFLAGS = -c -g -O -fPIE -std=c++11 -pedantic -Wall -Wextra \
