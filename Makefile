@@ -32,8 +32,9 @@ INCLUDES := -I. \
 
 # location of the QP-nano framework (if not provided in an env. variable)
 ifeq ($(QPN),)
-QPN := ../../..
+QPN := /home/varun/lubin/laser/qp/qpn
 endif
+QPN := /home/varun/lubin/laser/qp/qpn
 
 #-----------------------------------------------------------------------------
 # project files:
